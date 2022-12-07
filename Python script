@@ -1,0 +1,89 @@
+import MySQL as m
+
+cnt = m.server_connect('localhost','root','Password')
+m.database_create(cnt,'CREATE DATABASE School2')
+db = m.database_connect('localhost','root','Password','School2')
+
+table_teacher = """
+CREATE TABLE Teacher (
+    teacher_id INT,
+    first_name VARCHAR(40) NOT NULL,
+    last_name VARCHAR(40) NOT NULL,
+    email VARCHAR(30) UNIQUE,
+    phone_no VARCHAR(20) UNIQUE,
+    language_1 VARCHAR(3) NOT NULL,
+    Language_2 VARCHAR(3),
+    payment INT,
+    start_date DATE,
+    PRIMARY KEY(teacher_id)
+);
+"""
+
+table_participant = '''
+CREATE TABLE Participant (
+    participant_id INT,
+    first_name VARCHAR(40) NOT NULL,
+    last_name VARCHAR(40) NOT NULL,
+    email VARCHAR(30) UNIQUE,
+    phone_no VARCHAR(20) UNIQUE,
+    client INT,
+    PRIMARY KEY(participant_id)
+);
+'''
+
+table_client = '''
+CREATE TABLE Client (
+    client_id INT,
+    client_name VARCHAR(40) NOT NULL,
+    industry VARCHAR(30),
+    address VARCHAR(15) NOT NULL,
+    PRIMARY KEY(client_id)
+);
+'''
+
+table_courses = '''
+CREATE TABLE Courses (
+    course_id INT,
+    course_name VARCHAR(30) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    location BOOLEAN,
+    level INT,
+    language VARCHAR(3) NOT NULL,
+    teacher INT,
+    client INT,
+    PRIMARY KEY(course_id),
+    FOREIGN KEY(teacher) REFERENCES Teacher(teacher_ID) ON DELETE SET NULL,
+    FOREIGN KEY(client) REFERENCES Client(client_ID) ON DELETE SET NULL
+);
+'''
+table_takescourses = '''
+CREATE TABLE Takes_Courses (
+participant_id INT,
+course_id INT,
+PRIMARY KEY(participant_id,course_id),
+FOREIGN KEY(participant_id) REFERENCES Participant(participant_id) ON DELETE CASCADE,
+FOREIGN KEY(course_id) REFERENCES Courses(course_id) ON DELETE CASCADE
+);
+'''
+
+m.query_execute(db,table_teacher)
+m.query_execute(db,table_client)
+m.query_execute(db,table_participant)
+m.query_execute(db,table_courses)
+m.query_execute(db,table_takescourses)
+
+pop_teacher = '''
+INSERT INTO Teacher(teacher_id, first_name, last_name, email, phone_no, language_1, Language_2, payment, start_date) 
+VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+'''
+teacher_values = [(1,'sam','boy','sam@gmail.com','+2348176827463','ENG','RUS',1000,'2022-12-01'),(2,'sam','boy','sam1@gmail.com','+2348166827463','ENG','RUS',2000,'2022-12-01')]
+
+m.query_execute_list(db,pop_teacher,teacher_values)
+
+show = '''
+SELECT * FROM Teacher;
+'''
+c = ['teacher_id', 'first_name', 'last_name', 'email', 'phone_no', 'language_1', 'Language_2', 'payment', 'start_date']
+m.query_read_pandas(db,show,c)
+m.query_read(db,show)
