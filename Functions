@@ -1,0 +1,72 @@
+import mysql.connector as m
+from mysql.connector import Error
+import pandas as pd
+
+def server_connect(h,u,p):
+    c = None
+    try:
+        c = m.connect(host=h,user=u,password=p)
+        if c.is_connected():
+            print('MySQL Server Connection Successful \n')
+    except Error as e:
+        print(e, '\n')
+    return c
+
+def database_create(p,q):
+    cus = p.cursor()
+    try:
+        cus.execute(q)
+        print('MySQL Database Created Successfully \n')
+    except Error as e:
+        print(e, '\n')
+
+def database_connect(h,u,p,d):
+    c = None
+    try:
+        c = m.connect(host=h,user=u,password=p,database=d)
+        if c.is_connected():
+            print('MySQL Database Connection Successful \n')
+    except Error as e:
+        print(e, '\n')
+    return c
+
+def query_execute(c, q):
+    cus = c.cursor()
+    try:
+        cus.execute(q)
+        c.commit()
+        print('Query successful \n')
+    except Error as e:
+        print(e, '\n')
+
+def query_execute_list(c, q, z):
+    cus = c.cursor()
+    try:
+        cus.executemany(q, z)
+        c.commit()
+        print('Query successful \n')
+    except Error as e:
+        print(e, '\n')
+
+def query_read(c, q):
+    cus = c.cursor()
+    res = None
+    try:
+        cus.execute(q)
+        res = cus.fetchall()
+        print(res, '\n')
+    except Error as e:
+        print(e, '\n')
+    return res
+
+def query_read_pandas(c, q, col):
+    cus = c.cursor()
+    res = None
+    try:
+        cus.execute(q)
+        res = cus.fetchall()
+        a = pd.DataFrame(res, columns = col)
+        print(a, '\n')
+    except Error as e:
+        print(e, '\n')
+    return res
